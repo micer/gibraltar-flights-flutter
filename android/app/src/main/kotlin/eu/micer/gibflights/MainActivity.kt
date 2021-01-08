@@ -1,4 +1,4 @@
-package com.example.gibraltar_flights
+package eu.micer.gibflights
 
 import io.flutter.embedding.android.FlutterActivity
 

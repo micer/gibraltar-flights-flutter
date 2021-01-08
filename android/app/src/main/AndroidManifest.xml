@@ -1,9 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.gibraltar_flights">
+    package="eu.micer.gibflights">
 
     <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="gibraltar_flights"
+        android:label="Gibraltar Flights"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
