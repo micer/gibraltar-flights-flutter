@@ -42,7 +42,7 @@ android {
 
     buildTypes {
         debug {
-
+            applicationIdSuffix ".debug"
         }
         release {
             // TODO: Add your own signing config for the release build.

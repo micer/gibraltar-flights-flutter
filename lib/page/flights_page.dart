@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gibraltar_flights/main.dart';
@@ -5,6 +6,7 @@ import 'package:gibraltar_flights/model/flight.dart';
 import 'package:gibraltar_flights/model/flights.dart';
 import 'package:gibraltar_flights/util/extensions.dart';
 import 'package:gibraltar_flights/util/scrappy.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class FlightsPage extends StatefulWidget {
   const FlightsPage({Key key, @required this.title}) : super(key: key);
@@ -15,12 +17,14 @@ class FlightsPage extends StatefulWidget {
 }
 
 class _FlightsPageState extends State<FlightsPage> {
-  Future<Flights> futureFlights;
+  Flights flights;
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: true);
 
   @override
   void initState() {
     super.initState();
-    futureFlights = Scrapper.scrapeData();
+    flights = Flights(items: []);
   }
 
   @override
@@ -30,19 +34,18 @@ class _FlightsPageState extends State<FlightsPage> {
           title: Text(widget.title),
         ),
         body: Center(
-            child: FutureBuilder(
-                future: futureFlights,
-                builder: (context, snapshot) {
-                  return RefreshIndicator(
-                    child: _listView(snapshot),
-                    onRefresh: _pullRefresh,
-                  );
-                })));
+            child: SmartRefresher(
+          enablePullDown: true,
+          enablePullUp: false,
+          controller: _refreshController,
+          onRefresh: () => _onRefresh(context),
+          child: _listView(),
+        )));
   }
 
-  Widget _listView(AsyncSnapshot snapshot) {
-    if (snapshot.hasData) {
-      List<ListItem> _items = processData(snapshot.data.items);
+  Widget _listView() {
+    if (flights.items.isNotEmpty) {
+      List<ListItem> _items = processData(flights.items);
       return ListView.builder(
         itemCount: _items.length,
         itemBuilder: (context, index) {
@@ -59,15 +62,37 @@ class _FlightsPageState extends State<FlightsPage> {
         },
       );
     } else {
-      return const CircularProgressIndicator();
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("There are no flights in the list."),
+          Container(
+            margin: EdgeInsetsDirectional.only(top: 16),
+            child: TextButton(
+                onPressed: () => _refreshController.requestRefresh(),
+                child: Text("refresh".toUpperCase()),
+                style: TextButton.styleFrom(
+                  primary: Colors.white,
+                  backgroundColor: Theme.of(context).accentColor,
+                  onSurface: Colors.grey,
+                )),
+          )
+        ],
+      );
     }
   }
 
-  Future<void> _pullRefresh() async {
-    Future<Flights> freshFutureFlights = Scrapper.scrapeData();
-    setState(() {
-      futureFlights = Future.value(freshFutureFlights);
+  Future<void> _onRefresh(BuildContext context) async {
+    Future<Flights> _freshFutureFlights = Scrapper.scrapeData();
+    _freshFutureFlights.catchError((e) {
+      _refreshController.refreshFailed();
+      _showError(context, "Couldn't load data, please try again.");
     });
+    Flights _freshFlights = await _freshFutureFlights;
+    setState(() {
+      flights = _freshFlights;
+    });
+    _refreshController.refreshCompleted();
   }
 
   List<ListItem> processData(List<Flight> flightList) {
@@ -85,6 +110,11 @@ class _FlightsPageState extends State<FlightsPage> {
           "${flight.datetime.hour}:${flight.datetime.minute}", flight.type));
     });
     return result;
+  }
+
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(message), backgroundColor: Theme.of(context).errorColor));
   }
 }
 
