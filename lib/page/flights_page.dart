@@ -104,12 +104,34 @@ class _FlightsPageState extends State<FlightsPage> {
       final DateTime flightDT = flight.datetime;
       if (dt == null || !flightDT.isSameDate(dt)) {
         dt = flight.datetime;
-        result.add(HeadingItem("${dt.day}/${dt.month}/${dt.year}"));
+        result.add(HeadingItem(
+            "${_getWeekDayName(dt)} ${dt.day}/${dt.month}/${dt.year}"));
       }
       result.add(FlightItem(flight.code, flight.destination, flight.status,
           "${flight.datetime.hour}:${flight.datetime.minute}", flight.type));
     });
     return result;
+  }
+
+  String _getWeekDayName(DateTime dateTime) {
+    switch (dateTime.weekday) {
+      case DateTime.monday:
+        return "Monday";
+      case DateTime.tuesday:
+        return "Tuesday";
+      case DateTime.wednesday:
+        return "Wednesday";
+      case DateTime.thursday:
+        return "Thursday";
+      case DateTime.friday:
+        return "Friday";
+      case DateTime.saturday:
+        return "Saturday";
+      case DateTime.sunday:
+        return "Sunday";
+      default:
+        return "";
+    }
   }
 
   void _showError(BuildContext context, String message) {
@@ -144,7 +166,7 @@ class HeadingItem implements ListItem {
       decoration: BoxDecoration(
           color: Theme.of(context).primaryColorLight,
           border: Border.all(color: Theme.of(context).accentColor),
-          borderRadius: BorderRadius.circular(10)),
+          borderRadius: BorderRadius.circular(8)),
     );
   }
 
@@ -194,9 +216,32 @@ class FlightItem implements ListItem {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(time, style: Theme.of(context).textTheme.headline5),
-          Text(status, style: Theme.of(context).textTheme.caption)
+          Container(
+            padding: EdgeInsets.all(4),
+            decoration: BoxDecoration(
+                color: _getStatusColor(),
+                borderRadius: BorderRadius.circular(4)),
+            child: Text(status,
+                style: Theme.of(context)
+                    .textTheme
+                    .caption
+                    .apply(color: Colors.white)),
+          )
         ],
       ),
     );
+  }
+
+  Color _getStatusColor() {
+    switch (status.toLowerCase()) {
+      case "scheduled":
+        return Colors.green;
+      case "delayed":
+        return Colors.orange;
+      case "canceled":
+        return ThemeData().errorColor;
+      default:
+        return ThemeData().accentColor;
+    }
   }
 }
