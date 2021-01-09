@@ -37,6 +37,8 @@ class Flight extends Item {
 
   DateTime get datetime {
     var jiffy = Jiffy(this.datetimeStr, "EEEE d' of 'MMMM yyyy kk:mm");
+    jiffy.add(
+        hours: 1); // this is an ugly adjustment of time zone, but whatever
     return jiffy.dateTime;
   }
 

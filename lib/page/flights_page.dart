@@ -6,6 +6,7 @@ import 'package:gibraltar_flights/model/flight.dart';
 import 'package:gibraltar_flights/model/flights.dart';
 import 'package:gibraltar_flights/util/extensions.dart';
 import 'package:gibraltar_flights/util/scrappy.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class FlightsPage extends StatefulWidget {
@@ -108,7 +109,7 @@ class _FlightsPageState extends State<FlightsPage> {
             "${_getWeekDayName(dt)} ${dt.day}/${dt.month}/${dt.year}"));
       }
       result.add(FlightItem(flight.code, flight.destination, flight.status,
-          "${flight.datetime.hour}:${flight.datetime.minute}", flight.type));
+          "${DateFormat("HH:mm").format(flight.datetime)}", flight.type));
     });
     return result;
   }
@@ -233,9 +234,11 @@ class FlightItem implements ListItem {
   }
 
   Color _getStatusColor() {
+    if (RegExp("arrived|departed").hasMatch(status.toLowerCase())) {
+      return Colors.green;
+    }
+
     switch (status.toLowerCase()) {
-      case "scheduled":
-        return Colors.green;
       case "delayed":
         return Colors.orange;
       case "canceled":
