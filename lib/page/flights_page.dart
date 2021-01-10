@@ -21,6 +21,7 @@ class _FlightsPageState extends State<FlightsPage> {
   Flights flights;
   RefreshController _refreshController =
       RefreshController(initialRefresh: true);
+  double _refreshButtonOpacity = 1;
 
   @override
   void initState() {
@@ -69,14 +70,17 @@ class _FlightsPageState extends State<FlightsPage> {
           Text("There are no flights in the list."),
           Container(
             margin: EdgeInsetsDirectional.only(top: 16),
-            child: TextButton(
-                onPressed: () => _refreshController.requestRefresh(),
-                child: Text("refresh".toUpperCase()),
-                style: TextButton.styleFrom(
-                  primary: Colors.white,
-                  backgroundColor: Theme.of(context).accentColor,
-                  onSurface: Colors.grey,
-                )),
+            child: Opacity(
+              opacity: _refreshButtonOpacity,
+              child: TextButton(
+                  onPressed: () => _refreshController.requestRefresh(),
+                  child: Text("refresh".toUpperCase()),
+                  style: TextButton.styleFrom(
+                    primary: Colors.white,
+                    backgroundColor: Theme.of(context).accentColor,
+                    onSurface: Colors.grey,
+                  )),
+            ),
           )
         ],
       );
@@ -84,14 +88,23 @@ class _FlightsPageState extends State<FlightsPage> {
   }
 
   Future<void> _onRefresh(BuildContext context) async {
+    setState(() {
+      _refreshButtonOpacity = 0;
+    });
     Future<Flights> _freshFutureFlights = Scrapper.scrapeData();
     _freshFutureFlights.catchError((e) {
+      setState(() {
+        _refreshButtonOpacity = 1;
+      });
       _refreshController.refreshFailed();
       _showError(context, "Couldn't load data, please try again.");
     });
     Flights _freshFlights = await _freshFutureFlights;
     setState(() {
       flights = _freshFlights;
+      if (flights.items.isEmpty) {
+        _refreshButtonOpacity = 1;
+      }
     });
     _refreshController.refreshCompleted();
   }
