@@ -1,3 +1,4 @@
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -22,11 +23,30 @@ class _FlightsPageState extends State<FlightsPage> {
   RefreshController _refreshController =
       RefreshController(initialRefresh: true);
   double _refreshButtonOpacity = 1;
+  BannerAd _bannerAd;
+
+  static BannerAd createBannerAd() {
+    return BannerAd(
+      adUnitId: "ca-app-pub-3670766355752604/4950986030",
+      size: AdSize.banner,
+      listener: (MobileAdEvent event) {
+        print("BannerAd event $event");
+      },
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     flights = Flights(items: []);
+    FirebaseAdMob.instance.initialize(appId: FirebaseAdMob.testAppId);
+    _bannerAd = createBannerAd()..load()..show();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd.dispose();
+    super.dispose();
   }
 
   @override
@@ -53,14 +73,8 @@ class _FlightsPageState extends State<FlightsPage> {
         itemBuilder: (context, index) {
           final item = _items[index];
           return Container(
-            margin: EdgeInsets.symmetric(horizontal: 8),
-            child: ListTile(
-              title: item.buildTitle(context),
-              subtitle: item.buildSubtitle(context),
-              leading: item.buildIcon(context),
-              trailing: item.buildStatusData(context),
-            ),
-          );
+              margin: EdgeInsets.symmetric(horizontal: 8),
+              child: _buildListTile(item, context));
         },
       );
     } else {
@@ -83,6 +97,19 @@ class _FlightsPageState extends State<FlightsPage> {
             ),
           )
         ],
+      );
+    }
+  }
+
+  ListTile _buildListTile(ListItem item, BuildContext context) {
+    if (item is AdItem) {
+      return item.buildAd(context);
+    } else {
+      return ListTile(
+        title: item.buildTitle(context),
+        subtitle: item.buildSubtitle(context),
+        leading: item.buildIcon(context),
+        trailing: item.buildStatusData(context),
       );
     }
   }
@@ -114,12 +141,20 @@ class _FlightsPageState extends State<FlightsPage> {
     List<ListItem> result = [];
 
     var dt;
+    var addAd = false;
     flightList.forEach((flight) {
       final DateTime flightDT = flight.datetime;
       if (dt == null || !flightDT.isSameDate(dt)) {
         dt = flight.datetime;
+
+        // TODO use this once inline AdMob is possible
+        // if (addAd) {
+        //   result.add(AdItem(_bannerAd));
+        //   addAd = false;
+        // }
         result.add(HeadingItem(
             "${_getWeekDayName(dt)} ${dt.day}/${dt.month}/${dt.year}"));
+        addAd = true;
       }
       result.add(FlightItem(flight.code, flight.destination, flight.status,
           "${DateFormat("HH:mm").format(flight.datetime)}", flight.type));
@@ -162,6 +197,44 @@ abstract class ListItem {
   Widget buildIcon(BuildContext context);
 
   Widget buildStatusData(BuildContext context);
+
+  Widget buildAd(BuildContext context);
+}
+
+class AdItem implements ListItem {
+  BannerAd _bannerAd;
+
+  AdItem(this._bannerAd);
+
+  @override
+  Widget buildAd(BuildContext context) {
+    return ListTile(
+      title: Container(
+        // TODO implement inline Ad once available, see https://github.com/flutter/flutter/issues/12114#issuecomment-725731427
+        child: SizedBox.shrink(),
+        // child: RaisedButton(
+        //     child: const Text('SHOW BANNER'),
+        //     onPressed: () {
+        //       _bannerAd ??= _FlightsPageState.createBannerAd();
+        //       _bannerAd
+        //         ..load()
+        //         ..show();
+        //     }),
+      ),
+    );
+  }
+
+  @override
+  Widget buildIcon(BuildContext context) => null;
+
+  @override
+  Widget buildStatusData(BuildContext context) => null;
+
+  @override
+  Widget buildSubtitle(BuildContext context) => null;
+
+  @override
+  Widget buildTitle(BuildContext context) => null;
 }
 
 class HeadingItem implements ListItem {
@@ -191,6 +264,9 @@ class HeadingItem implements ListItem {
 
   @override
   Widget buildStatusData(BuildContext context) => null;
+
+  @override
+  Widget buildAd(BuildContext context) => null;
 }
 
 class FlightItem implements ListItem {
@@ -260,4 +336,7 @@ class FlightItem implements ListItem {
         return ThemeData().accentColor;
     }
   }
+
+  @override
+  Widget buildAd(BuildContext context) => null;
 }

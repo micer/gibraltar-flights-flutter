@@ -29,6 +29,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.1
 
+  firebase_admob: ^0.11.0+1
   flutter_svg: ^0.19.2+1
   html: ^0.14.0+3
   jiffy: ^3.0.1

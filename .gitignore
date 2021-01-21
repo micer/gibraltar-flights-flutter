@@ -1,3 +1,6 @@
+# Project specific
+**/google-services.json
+
 # Miscellaneous
 *.class
 *.lock
