@@ -5,7 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-import 'page/flights_page.dart';
+import 'page/flights.dart';
 import 'util/colors.dart';
 import 'util/proxy_for_debug.dart';
 

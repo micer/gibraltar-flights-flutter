@@ -5,11 +5,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gibraltar_flights/main.dart';
 import 'package:gibraltar_flights/model/flight.dart';
 import 'package:gibraltar_flights/model/flights.dart';
+import 'package:gibraltar_flights/page/about.dart' as about;
 import 'package:gibraltar_flights/util/extensions.dart';
 import 'package:gibraltar_flights/util/scrappy.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 
 class FlightsPage extends StatefulWidget {
   const FlightsPage({Key key, @required this.title}) : super(key: key);
@@ -41,7 +41,9 @@ class _FlightsPageState extends State<FlightsPage> {
     super.initState();
     flights = Flights(items: []);
     FirebaseAdMob.instance.initialize(appId: FirebaseAdMob.testAppId);
-    _bannerAd = createBannerAd()..load()..show();
+    _bannerAd = createBannerAd()
+      ..load()
+      ..show();
   }
 
   @override
@@ -62,21 +64,7 @@ class _FlightsPageState extends State<FlightsPage> {
                   color: Colors.white,
                 ),
                 onPressed: () =>
-                    Alert(
-                      context: context,
-                      title: "Thanks for using this app!",
-                      desc: "Made with ❤️ during 2020/21 pandemic times.",
-                      image: Image.asset("assets/launcher/ic_launcher_foreground.png"),
-                      buttons: [
-                        DialogButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(
-                            "CLOSE",
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
-                        )
-                      ]
-                    ).show()
+                    about.showAboutDialog(context: context)
             )
           ],
         ),
