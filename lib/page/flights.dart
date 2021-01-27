@@ -11,6 +11,9 @@ import 'package:gibraltar_flights/util/scrappy.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
+// const String testDevice = '77773931FCB634D6B0C83152B6D99482';
+const String testDevice = null;
+
 class FlightsPage extends StatefulWidget {
   const FlightsPage({Key key, @required this.title}) : super(key: key);
   final title;
@@ -22,14 +25,18 @@ class FlightsPage extends StatefulWidget {
 class _FlightsPageState extends State<FlightsPage> {
   Flights flights;
   RefreshController _refreshController =
-  RefreshController(initialRefresh: true);
+      RefreshController(initialRefresh: true);
   double _refreshButtonOpacity = 1;
   BannerAd _bannerAd;
+
+  static const MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
+      testDevices: testDevice != null ? <String>[testDevice] : null);
 
   static BannerAd createBannerAd() {
     return BannerAd(
       adUnitId: "ca-app-pub-3670766355752604/4950986030",
       size: AdSize.banner,
+      targetingInfo: targetingInfo,
       listener: (MobileAdEvent event) {
         print("BannerAd event $event");
       },
@@ -40,7 +47,9 @@ class _FlightsPageState extends State<FlightsPage> {
   void initState() {
     super.initState();
     flights = Flights(items: []);
-    FirebaseAdMob.instance.initialize(appId: FirebaseAdMob.testAppId);
+    FirebaseAdMob.instance
+        .initialize(appId: "ca-app-pub-3670766355752604~8697825200");
+
     _bannerAd = createBannerAd()
       ..load()
       ..show();
@@ -63,19 +72,17 @@ class _FlightsPageState extends State<FlightsPage> {
                   Icons.info_outline,
                   color: Colors.white,
                 ),
-                onPressed: () =>
-                    about.showAboutDialog(context: context)
-            )
+                onPressed: () => about.showAboutDialog(context: context))
           ],
         ),
         body: Center(
             child: SmartRefresher(
-              enablePullDown: true,
-              enablePullUp: false,
-              controller: _refreshController,
-              onRefresh: () => _onRefresh(context),
-              child: _listView(),
-            )));
+          enablePullDown: true,
+          enablePullUp: false,
+          controller: _refreshController,
+          onRefresh: () => _onRefresh(context),
+          child: _listView(),
+        )));
   }
 
   Widget _listView() {
@@ -104,9 +111,7 @@ class _FlightsPageState extends State<FlightsPage> {
                   child: Text("refresh".toUpperCase()),
                   style: TextButton.styleFrom(
                     primary: Colors.white,
-                    backgroundColor: Theme
-                        .of(context)
-                        .accentColor,
+                    backgroundColor: Theme.of(context).accentColor,
                     onSurface: Colors.grey,
                   )),
             ),
@@ -200,9 +205,7 @@ class _FlightsPageState extends State<FlightsPage> {
 
   void _showError(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(message), backgroundColor: Theme
-        .of(context)
-        .errorColor));
+        content: Text(message), backgroundColor: Theme.of(context).errorColor));
   }
 }
 
@@ -263,20 +266,13 @@ class HeadingItem implements ListItem {
     return Container(
       child: Text(
         heading,
-        style: Theme
-            .of(context)
-            .textTheme
-            .headline5,
+        style: Theme.of(context).textTheme.headline5,
       ),
       alignment: Alignment.center,
       padding: EdgeInsets.all(4),
       decoration: BoxDecoration(
-          color: Theme
-              .of(context)
-              .primaryColorLight,
-          border: Border.all(color: Theme
-              .of(context)
-              .accentColor),
+          color: Theme.of(context).primaryColorLight,
+          border: Border.all(color: Theme.of(context).accentColor),
           borderRadius: BorderRadius.circular(8)),
     );
   }
@@ -315,9 +311,7 @@ class FlightItem implements ListItem {
           textDirection: TextDirection.ltr,
           child: SvgPicture.asset(
             type == "arrival" ? IconNames.arrivals : IconNames.departures,
-            color: Theme
-                .of(context)
-                .accentColor,
+            color: Theme.of(context).accentColor,
             matchTextDirection: true,
           )),
     );
@@ -331,18 +325,14 @@ class FlightItem implements ListItem {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(time, style: Theme
-              .of(context)
-              .textTheme
-              .headline5),
+          Text(time, style: Theme.of(context).textTheme.headline5),
           Container(
             padding: EdgeInsets.all(4),
             decoration: BoxDecoration(
                 color: _getStatusColor(),
                 borderRadius: BorderRadius.circular(4)),
             child: Text(status,
-                style: Theme
-                    .of(context)
+                style: Theme.of(context)
                     .textTheme
                     .caption
                     .apply(color: Colors.white)),

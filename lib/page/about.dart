@@ -32,7 +32,7 @@ class _AboutDialog extends StatelessWidget {
     final repoLinkText = "source code";
     final privacyLinkText = "privacy policy";
     final mainText =
-        "Feel free to check out the source code of this app if you're interested. Mandatory link to privacy policy belongs here too.\n\n🐵 Please DO NOT feed the monkeys! 🐵";
+        "Feel free to check out the source code of this app if you're interested. Mandatory link to privacy policy belongs here too.";
     final repoLinkIndex = mainText.indexOf(repoLinkText);
     final repoLinkIndexEnd = repoLinkIndex + repoLinkText.length;
     final privacyLinkIndex = mainText.indexOf(privacyLinkText);
